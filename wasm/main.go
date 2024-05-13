@@ -1,10 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/rs/zerolog"
+	"io"
 	"os"
-	"strings"
 	"syscall/js"
 
 	"github.com/onflow/flow-emulator/emulator"
@@ -13,18 +14,34 @@ import (
 
 type Config struct {
 	Verbose   bool
-	LogFormat string
+	LogFormat string // "text" or "json". Defaults to "json" if "logs" writer is used.
+}
+
+type WasmEmulator struct {
+	config     Config
+	blockchain *emulator.Blockchain
+	logger     *zerolog.Logger
+	cachedLogs *CacheLogWriter
 }
 
 func main() {
 	fmt.Println("Starting emulator")
 
-	config := Config{
+	w := NewWasmEmulator(Config{
 		Verbose:   true,
 		LogFormat: "text",
-	}
+	})
 
-	logger := initLogger(config)
+	// Mount the function on the JavaScript global object.
+	js.Global().Set("GetAccount", js.FuncOf(w.GetAccount))
+	js.Global().Set("GetLogs", js.FuncOf(w.GetLogs))
+
+	// Prevent the function from returning, which is required in a wasm module
+	select {}
+}
+
+func NewWasmEmulator(config Config) *WasmEmulator {
+	logger, cacheWriter := initLogger(config)
 
 	blockchain, err := emulator.New(
 		emulator.WithLogger(*logger),
@@ -34,48 +51,86 @@ func main() {
 		panic(err)
 	}
 
-	// Mount the function on the JavaScript global object.
-	js.Global().Set("GetAccount", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		address := flowgo.HexToAddress(args[0].String())
-		account, err := blockchain.GetAccount(address)
-
-		if err != nil {
-			panic(err)
-		}
-
-		return map[string]interface{}{
-			"address": account.Address.String(),
-			"balance": account.Balance,
-			// "contracts": account.Contracts,
-		}
-	}))
-
-	// Prevent the function from returning, which is required in a wasm module
-	select {}
+	return &WasmEmulator{
+		config:     config,
+		blockchain: blockchain,
+		logger:     logger,
+		cachedLogs: cacheWriter,
+	}
 }
 
-func initLogger(conf Config) *zerolog.Logger {
+func (w *WasmEmulator) GetAccount(this js.Value, args []js.Value) interface{} {
+	address := flowgo.HexToAddress(args[0].String())
+	account, err := w.blockchain.GetAccount(address)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return map[string]interface{}{
+		"address": account.Address.String(),
+		"balance": account.Balance,
+		// "contracts": account.Contracts,
+	}
+}
+
+func (w *WasmEmulator) GetLogs(this js.Value, args []js.Value) interface{} {
+	fmt.Println("Cache size", len(w.cachedLogs.logs))
+
+	res, err := json.Marshal(&w.cachedLogs.logs)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return string(res)
+}
+
+func initLogger(config Config) (*zerolog.Logger, *CacheLogWriter) {
 
 	level := zerolog.InfoLevel
-	if conf.Verbose {
+	if config.Verbose {
 		level = zerolog.DebugLevel
 	}
 	zerolog.MessageFieldName = "msg"
 
-	switch strings.ToLower(conf.LogFormat) {
-	case "json":
-		logger := zerolog.New(os.Stdout).With().Timestamp().Logger().Level(level)
-		return &logger
-	default:
-		writer := zerolog.ConsoleWriter{Out: os.Stdout}
-		writer.FormatMessage = func(i interface{}) string {
-			if i == nil {
-				return ""
-			}
-			return fmt.Sprintf("%-44s", i)
+	cacheWriter := NewCacheLogWriter()
+
+	writer := zerolog.MultiLevelWriter(
+		NewTextWriter(),
+		cacheWriter,
+	)
+
+	logger := zerolog.New(writer).With().Timestamp().Logger().Level(level)
+
+	return &logger, cacheWriter
+}
+
+func NewTextWriter() zerolog.ConsoleWriter {
+	writer := zerolog.ConsoleWriter{Out: os.Stdout}
+	writer.FormatMessage = func(i interface{}) string {
+		if i == nil {
+			return ""
 		}
-		logger := zerolog.New(writer).With().Timestamp().Logger().Level(level)
-		return &logger
+		return fmt.Sprintf("%-44s", i)
 	}
 
+	return writer
+}
+
+type CacheLogWriter struct {
+	logs []string
+}
+
+func NewCacheLogWriter() *CacheLogWriter {
+	return &CacheLogWriter{
+		logs: make([]string, 0),
+	}
+}
+
+var _ io.Writer = &CacheLogWriter{}
+
+func (c *CacheLogWriter) Write(p []byte) (n int, err error) {
+	c.logs = append(c.logs, string(p))
+	return len(p), nil
 }
