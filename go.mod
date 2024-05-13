@@ -138,7 +138,7 @@ require (
 	github.com/onflow/flow-nft/lib/go/templates v1.2.0 // indirect
 	github.com/onflow/go-ethereum v1.13.4 // indirect
 	github.com/onflow/sdks v0.5.1-0.20230912225508-b35402f12bba // indirect
-	github.com/onflow/wal v0.0.0-20240208022732-d756cd497d3b // indirect
+	github.com/onflow/wal v1.0.2 // indirect
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
@@ -209,7 +209,9 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
-replace github.com/onflow/flow-go v0.34.0-crescendo-preview.18 => github.com/The-K-R-O-K/flow-go v0.34.0-crescendo-preview.9.0.20240508085818-dd583cbc9a7b
+// TODO: Uncomment when this issue is resolved: https://github.com/onflow/flow-go/issues/5899
+// replace github.com/onflow/flow-go v0.34.0-crescendo-preview.18 => github.com/The-K-R-O-K/flow-go v0.34.0-crescendo-preview.9.0.20240508085818-dd583cbc9a7b
+replace github.com/onflow/flow-go => ../flow-go
 
 replace github.com/dgraph-io/badger/v2 => ../badger-js
 
