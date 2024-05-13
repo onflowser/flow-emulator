@@ -1,6 +1,6 @@
 module github.com/onflow/flow-emulator
 
-go 1.20
+go 1.21.4
 
 require (
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.2
@@ -42,7 +42,6 @@ require (
 	github.com/bits-and-blooms/bitset v1.10.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
-	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cockroachdb/errors v1.9.1 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
@@ -58,8 +57,6 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/dgraph-io/badger/v2 v2.2007.4 // indirect
-	github.com/dgraph-io/ristretto v0.1.0 // indirect
-	github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -78,7 +75,6 @@ require (
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/glog v1.2.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -142,7 +138,7 @@ require (
 	github.com/onflow/flow-nft/lib/go/templates v1.2.0 // indirect
 	github.com/onflow/go-ethereum v1.13.4 // indirect
 	github.com/onflow/sdks v0.5.1-0.20230912225508-b35402f12bba // indirect
-	github.com/onflow/wal v0.0.0-20240208022732-d756cd497d3b // indirect
+	github.com/onflow/wal v1.0.2 // indirect
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
@@ -191,7 +187,7 @@ require (
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/term v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
@@ -213,4 +209,16 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
-replace github.com/onflow/flow-go v0.34.0-crescendo-preview.18 => github.com/The-K-R-O-K/flow-go v0.34.0-crescendo-preview.9.0.20240508085818-dd583cbc9a7b
+// TODO: Uncomment when this issue is resolved: https://github.com/onflow/flow-go/issues/5899
+// replace github.com/onflow/flow-go v0.34.0-crescendo-preview.18 => github.com/The-K-R-O-K/flow-go v0.34.0-crescendo-preview.9.0.20240508085818-dd583cbc9a7b
+replace github.com/onflow/flow-go => ../flow-go
+
+replace github.com/dgraph-io/badger/v2 => ../badger-js
+
+replace github.com/VictoriaMetrics/fastcache => ../fastcache
+
+replace github.com/onflow/go-ethereum => ../go-ethereum
+
+replace github.com/gofrs/flock => ../flock
+
+replace github.com/cockroachdb/pebble => ../pebble

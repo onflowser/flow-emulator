@@ -1,5 +1,6 @@
 # Test binary, build with `go test -c`
 *.test
+flow-emulator.wasm
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
@@ -8,7 +9,7 @@
 coverage.zip
 cover.json
 cover-summary
-index.html
+/index.html
 
 # Since we have tooling that uses node
 node_modules
